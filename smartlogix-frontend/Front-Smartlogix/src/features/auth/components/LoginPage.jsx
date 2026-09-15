@@ -1,4 +1,4 @@
-import { useAuthSession } from '../hooks/useAuthSession'
+import { useMsalAuthSession } from '../hooks/useMsalAuthSession'
 import '../styles/auth-page.css'
 import AdminDashboard from '../../admin/components/AdminDashboard'
 import CustomerDashboard from '../../customer/components/CustomerDashboard'
@@ -6,15 +6,16 @@ import InventoryOperatorDashboard from '../../inventoryOperator/components/Inven
 import OrdersOperatorDashboard from '../../ordersOperator/components/OrdersOperatorDashboard'
 import ShippingOperatorDashboard from '../../shippingOperator/components/ShippingOperatorDashboard'
 import BrandPanel from './BrandPanel'
-import LoginForm from './LoginForm'
+import MsalLoginButton from './MsalLoginButton'
 import SessionCard from './SessionCard'
 
 /*
  * Contenedor principal del modulo de autenticacion.
- * Decide si se muestra el formulario o la tarjeta de sesion activa.
+ * Decide si se muestra el boton de login con Microsoft o la tarjeta
+ * de sesion activa, segun el estado de MSAL (tenant DSY1107005V).
  */
 function LoginPage() {
-  const authSession = useAuthSession()
+  const authSession = useMsalAuthSession()
   const isAdmin = authSession.roles.includes('ADMIN')
   const isInventoryOperator = authSession.roles.includes('OPERADOR_INVENTARIO')
   const isOrdersOperator = authSession.roles.includes('OPERADOR_PEDIDOS')
@@ -60,24 +61,7 @@ function LoginPage() {
                 userInitials={authSession.userInitials}
               />
             ) : (
-              <LoginForm
-                authMode={authSession.authMode}
-                errorMessage={authSession.errorMessage}
-                isSubmitting={authSession.isSubmitting}
-                loginForm={authSession.loginForm}
-                onInputChange={authSession.handleInputChange}
-                onPasswordResetInputChange={authSession.handlePasswordResetInputChange}
-                onPasswordResetSubmit={authSession.handlePasswordResetSubmit}
-                onShowLogin={authSession.showLoginForm}
-                onShowPasswordReset={authSession.showPasswordResetForm}
-                onSubmit={authSession.handleLoginSubmit}
-                onTogglePassword={authSession.togglePasswordVisibility}
-                onToggleResetPassword={authSession.toggleResetPasswordVisibility}
-                passwordResetForm={authSession.passwordResetForm}
-                showPassword={authSession.showPassword}
-                showResetPassword={authSession.showResetPassword}
-                successMessage={authSession.successMessage}
-              />
+              <MsalLoginButton onLogin={authSession.handleLogin} />
             )}
           </div>
         </div>
