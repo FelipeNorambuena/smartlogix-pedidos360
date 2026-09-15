@@ -1,0 +1,22 @@
+/*
+ * Constantes propias del modulo auth.
+ * Mantenerlas aqui evita duplicar valores entre componentes y hooks.
+ */
+export const AUTH_STORAGE_KEY = 'smartlogix.auth'
+
+export const INITIAL_LOGIN_FORM = {
+  email: '',
+  password: '',
+  rememberSession: true,
+}
+
+export const INITIAL_PASSWORD_RESET_FORM = {
+  email: '',
+  newPassword: '',
+}
+
+export const OPERATION_MODULES = [
+  { label: 'Inventario', value: 'Stock actualizado', tone: 'green' },
+  { label: 'Pedidos', value: 'Validaci\u00f3n lista', tone: 'blue' },
+  { label: 'Env\u00edos', value: 'Despachos activos', tone: 'amber' },
+]

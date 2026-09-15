@@ -1,0 +1,258 @@
+{
+  "info": {
+    "name": "SmartLogix - Inventario",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-API-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Listar productos activos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products?page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Buscar producto por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Buscar producto por SKU",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/sku/{{sku}}"
+          }
+        },
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"SLX-999\",\n  \"name\": \"Producto test\",\n  \"description\": \"Descripcion del producto\",\n  \"unitPrice\": 12990,\n  \"category\": \"Categoria\"\n}"
+            },
+            "url": "{{baseUrl}}/api/products"
+          }
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"SLX-999\",\n  \"name\": \"Producto test actualizado\",\n  \"description\": \"Nueva descripcion\",\n  \"unitPrice\": 13990,\n  \"category\": \"Categoria\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "Listar inventario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/inventory?page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Filtrar inventario bajo stock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/inventory?lowStock={{lowStock}}&warehouseLocation={{warehouseLocation}}&page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Buscar inventario por producto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/inventory/{{productId}}"
+          }
+        },
+        {
+          "name": "Consultar stock por producto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/inventory/{{productId}}/stock"
+          }
+        },
+        {
+          "name": "Consultar disponibilidad por cantidad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/inventory/{{productId}}/availability?quantity={{quantity}}"
+          }
+        },
+        {
+          "name": "Crear o actualizar inventario por producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stockAvailable\": 20,\n  \"stockReserved\": 5,\n  \"warehouseLocation\": \"Santiago\",\n  \"reorderPoint\": 3\n}"
+            },
+            "url": "{{baseUrl}}/api/inventory/{{productId}}"
+          }
+        },
+        {
+          "name": "Reservar stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": {{quantity}}\n}"
+            },
+            "url": "{{baseUrl}}/api/inventory/{{productId}}/reserve"
+          }
+        },
+        {
+          "name": "Liberar stock reservado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": {{quantity}}\n}"
+            },
+            "url": "{{baseUrl}}/api/inventory/{{productId}}/release"
+          }
+        },
+        {
+          "name": "Confirmar stock reservado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": {{quantity}}\n}"
+            },
+            "url": "{{baseUrl}}/api/inventory/{{productId}}/confirm"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Swagger UI",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/swagger-ui.html"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "productId",
+      "value": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "key": "sku",
+      "value": "SLX-999"
+    },
+    {
+      "key": "quantity",
+      "value": "4"
+    },
+    {
+      "key": "page",
+      "value": "0"
+    },
+    {
+      "key": "size",
+      "value": "20"
+    },
+    {
+      "key": "warehouseLocation",
+      "value": "Santiago"
+    },
+    {
+      "key": "lowStock",
+      "value": "true"
+    },
+    {
+      "key": "apiKey",
+      "value": ""
+    }
+  ]
+}

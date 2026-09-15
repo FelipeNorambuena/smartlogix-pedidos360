@@ -1,0 +1,30 @@
+Repositorio principal del proyecto:
+https://github.com/FelipeNorambuena/Smartlogix.git
+
+Componentes versionados dentro del repositorio principal:
+
+1. Frontend React
+   Enlace: https://github.com/FelipeNorambuena/Smartlogix/tree/main/smartlogix-frontend/Front-Smartlogix
+   Contenido: aplicacion React + Vite, package.json, dependencias NPM, assets publicos y codigo fuente organizado por features.
+
+2. API Gateway / entrada BFF para frontend
+   Enlace: https://github.com/FelipeNorambuena/Smartlogix/tree/main/api-gateway
+   Contenido: Spring Cloud Gateway WebMVC, configuracion JWT, CORS y rutas hacia microservicios.
+
+3. Auth service
+   Enlace: https://github.com/FelipeNorambuena/Smartlogix/tree/main/auth-service
+   Contenido: registro, login, usuarios, roles, JWT, migraciones Flyway y seguridad.
+
+4. Inventario service
+   Enlace: https://github.com/FelipeNorambuena/Smartlogix/tree/main/inventario
+   Contenido: productos, inventario, stock, disponibilidad, Factory Method para SKU, Flyway y API key interna.
+
+5. Pedidos service
+   Enlace: https://github.com/FelipeNorambuena/Smartlogix/tree/main/pedidos
+   Contenido: pedidos, items, estados, integracion con inventario y auth-service, Circuit Breaker y Flyway.
+
+6. Envios service
+   Enlace: https://github.com/FelipeNorambuena/Smartlogix/tree/main/envios
+   Contenido: envios, tracking, eventos, integracion con pedidos, Circuit Breaker y Flyway.
+
+
