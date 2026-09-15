@@ -59,8 +59,11 @@ public class OrdersRoutesConfig {
                 headers.remove("X-User-Email");
                 headers.remove("X-User-Roles");
             });
-            addHeaderIfPresent(builder, "X-User-Id", jwt.getClaimAsString("userId"));
-            addHeaderIfPresent(builder, "X-User-Email", jwt.getClaimAsString("email"));
+            // Azure AD identifica al usuario con el claim "oid" (Object ID en
+            // Entra ID), que ya viene en formato UUID: coincide exactamente
+            // con lo que UserContext.fromHeaders espera en pedidos.
+            addHeaderIfPresent(builder, "X-User-Id", jwt.getClaimAsString("oid"));
+            addHeaderIfPresent(builder, "X-User-Email", jwt.getClaimAsString("preferred_username"));
 
             List<String> roles = jwt.getClaimAsStringList("roles");
             if (roles != null && !roles.isEmpty()) {

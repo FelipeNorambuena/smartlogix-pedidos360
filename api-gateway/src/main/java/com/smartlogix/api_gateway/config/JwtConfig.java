@@ -1,13 +1,13 @@
 package com.smartlogix.api_gateway.config;
 
-import java.nio.charset.StandardCharsets;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
@@ -15,26 +15,21 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 public class JwtConfig {
 
     /*
-     * The Gateway validates the same HMAC JWT emitted by auth-service.
-     * JWT_SECRET and JWT_ISSUER must be shared between both applications.
+     * El Gateway (BFF) valida el JWT emitido por Azure AD / Microsoft Entra ID
+     * (tenant DSY1107005V, app "Pedidos360-SPA") en lugar del JWT HMAC propio
+     * que emitia auth-service. Se valida: firma (via JWKS del tenant),
+     * issuer y audience.
      */
     @Bean
-    public SecretKey jwtSecretKey(@Value("${security.jwt.secret}") String secret) {
-        byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
-        if (secretBytes.length < 32) {
-            throw new IllegalStateException("security.jwt.secret debe tener al menos 32 bytes");
-        }
-        return new SecretKeySpec(secretBytes, "HmacSHA256");
-    }
-
-    @Bean
     public JwtDecoder jwtDecoder(
-            SecretKey jwtSecretKey,
-            @Value("${security.jwt.issuer}") String issuer) {
-        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(jwtSecretKey)
-                .macAlgorithm(MacAlgorithm.HS256)
-                .build();
-        decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(issuer));
+            @Value("${security.jwt.issuer-uri}") String issuerUri,
+            @Value("${security.jwt.audience}") String audience) {
+        NimbusJwtDecoder decoder = (NimbusJwtDecoder) JwtDecoders.fromIssuerLocation(issuerUri);
+
+        OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefaultWithIssuer(issuerUri);
+        OAuth2TokenValidator<Jwt> audienceValidator = new AudienceValidator(audience);
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(defaultValidators, audienceValidator));
+
         return decoder;
     }
 }

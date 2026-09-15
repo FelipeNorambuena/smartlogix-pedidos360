@@ -3,6 +3,13 @@ import { msalConfig } from './msalConfig'
 
 export const msalInstance = new PublicClientApplication(msalConfig)
 
+// Solo en dev: permite inspeccionar la cuenta/token desde la consola del
+// navegador para probar el BFF con curl (Fase 4). No se incluye en build
+// de produccion (import.meta.env.DEV es false en `npm run build`).
+if (import.meta.env.DEV) {
+  window.__msal = msalInstance
+}
+
 // msal-browser v3+ exige inicializar la instancia antes de usar cualquier
 // otro metodo. main.jsx espera esta promesa antes de montar la app.
 // Se usa loginRedirect (no loginPopup): el flujo de popup depende de que
