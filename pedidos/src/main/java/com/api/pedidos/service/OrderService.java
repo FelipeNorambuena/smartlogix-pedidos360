@@ -14,6 +14,7 @@ import com.api.pedidos.exception.BusinessRuleException;
 import com.api.pedidos.exception.ForbiddenException;
 import com.api.pedidos.exception.InsufficientStockException;
 import com.api.pedidos.exception.ResourceNotFoundException;
+import com.api.pedidos.messaging.OrderEventPublisher;
 import com.api.pedidos.model.Order;
 import com.api.pedidos.model.OrderItem;
 import com.api.pedidos.model.OrderStatus;
@@ -50,14 +51,17 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final InventoryClient inventoryClient;
     private final AuthUserClient authUserClient;
+    private final OrderEventPublisher orderEventPublisher;
 
     public OrderService(
             OrderRepository orderRepository,
             InventoryClient inventoryClient,
-            AuthUserClient authUserClient) {
+            AuthUserClient authUserClient,
+            OrderEventPublisher orderEventPublisher) {
         this.orderRepository = orderRepository;
         this.inventoryClient = inventoryClient;
         this.authUserClient = authUserClient;
+        this.orderEventPublisher = orderEventPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -128,7 +132,10 @@ public class OrderService {
                 reservedStocks.add(new ReservedStock(item.getProductId(), item.getQuantity()));
             }
             order.setStatus(OrderStatus.CONFIRMED);
-            return OrderResponse.from(orderRepository.save(order));
+            Order savedOrder = orderRepository.save(order);
+            orderEventPublisher.publishOrderCreated(savedOrder);
+            orderEventPublisher.publishOrderConfirmed(savedOrder);
+            return OrderResponse.from(savedOrder);
         } catch (RuntimeException exception) {
             releaseReservedStocks(reservedStocks);
             throw exception;
@@ -178,7 +185,11 @@ public class OrderService {
         validateStatusTransition(order.getStatus(), newStatus);
         applyInventorySideEffects(order, newStatus);
         order.setStatus(newStatus);
-        return OrderResponse.from(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+        if (newStatus == OrderStatus.CONFIRMED) {
+            orderEventPublisher.publishOrderConfirmed(savedOrder);
+        }
+        return OrderResponse.from(savedOrder);
     }
 
     public OrderResponse cancel(UserContext userContext, UUID id) {

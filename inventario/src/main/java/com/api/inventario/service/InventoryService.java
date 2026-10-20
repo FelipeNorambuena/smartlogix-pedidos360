@@ -7,6 +7,7 @@ import com.api.inventario.dto.StockAvailabilityResponse;
 import com.api.inventario.dto.StockResponse;
 import com.api.inventario.exception.BusinessRuleException;
 import com.api.inventario.exception.ResourceNotFoundException;
+import com.api.inventario.messaging.StockAlertPublisher;
 import com.api.inventario.model.Inventory;
 import com.api.inventario.model.Product;
 import com.api.inventario.repository.InventoryRepository;
@@ -28,10 +29,15 @@ public class InventoryService {
      */
     private final InventoryRepository inventoryRepository;
     private final ProductService productService;
+    private final StockAlertPublisher stockAlertPublisher;
 
-    public InventoryService(InventoryRepository inventoryRepository, ProductService productService) {
+    public InventoryService(
+            InventoryRepository inventoryRepository,
+            ProductService productService,
+            StockAlertPublisher stockAlertPublisher) {
         this.inventoryRepository = inventoryRepository;
         this.productService = productService;
+        this.stockAlertPublisher = stockAlertPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -101,7 +107,9 @@ public class InventoryService {
         inventory.setWarehouseLocation(trimToNull(request.warehouseLocation()));
         inventory.setReorderPoint(request.reorderPoint());
 
-        return InventoryResponse.from(inventoryRepository.save(inventory));
+        Inventory savedInventory = inventoryRepository.save(inventory);
+        checkAndAlertLowStock(savedInventory);
+        return InventoryResponse.from(savedInventory);
     }
 
     public StockResponse reserveStock(UUID productId, Integer quantity) {
@@ -117,7 +125,9 @@ public class InventoryService {
         }
 
         inventory.setStockReserved(inventory.getStockReserved() + requestedQuantity);
-        return StockResponse.from(inventoryRepository.save(inventory));
+        Inventory savedInventory = inventoryRepository.save(inventory);
+        checkAndAlertLowStock(savedInventory);
+        return StockResponse.from(savedInventory);
     }
 
     public StockResponse releaseReservedStock(UUID productId, Integer quantity) {
@@ -144,6 +154,9 @@ public class InventoryService {
                     "No se puede confirmar mas stock del que esta reservado");
         }
 
+        // No se re-evalua la alerta de stock bajo aqui: reserved y available bajan
+        // en la misma cantidad, por lo que stockFree (available - reserved) no
+        // cambia respecto al estado ya evaluado cuando se reservo el stock.
         inventory.setStockReserved(inventory.getStockReserved() - requestedQuantity);
         inventory.setStockAvailable(inventory.getStockAvailable() - requestedQuantity);
         return StockResponse.from(inventoryRepository.save(inventory));
@@ -205,6 +218,13 @@ public class InventoryService {
 
     private int calculateStockFree(Inventory inventory) {
         return inventory.getStockAvailable() - inventory.getStockReserved();
+    }
+
+    private void checkAndAlertLowStock(Inventory inventory) {
+        int stockFree = calculateStockFree(inventory);
+        if (stockFree <= inventory.getReorderPoint()) {
+            stockAlertPublisher.publishStockLow(inventory, stockFree);
+        }
     }
 
     private void validateProductIsActive(Inventory inventory) {
