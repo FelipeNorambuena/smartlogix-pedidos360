@@ -1,4 +1,4 @@
-﻿package com.api.pedidos.service;
+package com.api.pedidos.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -18,6 +18,7 @@ import com.api.pedidos.dto.OrderResponse;
 import com.api.pedidos.dto.ProductInfoResponse;
 import com.api.pedidos.dto.StockAvailabilityResponse;
 import com.api.pedidos.exception.BusinessRuleException;
+import com.api.pedidos.messaging.OrderEventPublisher;
 import com.api.pedidos.model.Order;
 import com.api.pedidos.model.OrderItem;
 import com.api.pedidos.model.OrderStatus;
@@ -53,6 +54,9 @@ class OrderServiceTest {
 
     @Mock
     private AuthUserClient authUserClient;
+
+    @Mock
+    private OrderEventPublisher orderEventPublisher;
 
     @InjectMocks
     private OrderService orderService;
